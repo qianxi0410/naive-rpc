@@ -1,2 +1,2 @@
 # naive-rpc
-written a simple rpc framework in go
+[WIP] written a simple rpc framework in go
