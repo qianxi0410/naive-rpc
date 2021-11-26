@@ -17,7 +17,7 @@ type Router struct {
 }
 
 // return a router
-func New() *Router {
+func NewRouter() *Router {
 	return &Router{
 		mapping: make(map[string]HandleWrapper),
 		mutex:   &sync.RWMutex{},
