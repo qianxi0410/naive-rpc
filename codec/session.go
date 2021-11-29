@@ -41,7 +41,7 @@ func (r *BaseSession) Response() interface{} {
 	return nil
 }
 
-func (r *BaseSession) SerResponse(rsp interface{}) {
+func (r *BaseSession) SetResponse(rsp interface{}) {
 	if r != nil {
 		r.RspHead = rsp
 	}
