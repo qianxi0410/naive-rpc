@@ -9,8 +9,8 @@ import (
 func TestWithConf(t *testing.T) {
 	opts := options{}
 
-	o := WithConf("../loveyourself.ini")
+	o := WithConf("../loveyourself.yaml")
 	o(&opts)
 
-	assert.Equal(t, "../loveyourself.ini", opts.conf, "they should be equal")
+	assert.Equal(t, "../loveyourself.yaml", opts.conf, "they should be equal")
 }
