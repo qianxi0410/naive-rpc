@@ -4,6 +4,7 @@ import (
 	"github.com/qianxi0410/naive-rpc/client/selector"
 	"github.com/qianxi0410/naive-rpc/client/transport"
 	"github.com/qianxi0410/naive-rpc/codec"
+	"github.com/qianxi0410/naive-rpc/codec/evangelion"
 )
 
 type Option func(*client)
@@ -65,7 +66,7 @@ func WithTransportType(typ TransportType) Option {
 		case TCP, TCP4, TCP6:
 			r.Transport = &transport.TcpTransport{
 				Pool:  defaultPoolFactory,
-				Codec: codec.ClientCodec("whisper"),
+				Codec: codec.ClientCodec(evangelion.NAME),
 			}
 		}
 	}

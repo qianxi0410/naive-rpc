@@ -4,6 +4,7 @@ import (
 	"context"
 	ers "errors"
 	"fmt"
+	"net"
 	"time"
 
 	"github.com/qianxi0410/naive-rpc/client/pool"
@@ -24,7 +25,9 @@ func (r *TcpTransport) Send(ctx context.Context, network, addr string, reqHead i
 		return nil, err
 	}
 
-	conn, err := r.Pool.Get(ctx, network, addr)
+	// conn, err := r.Pool.Get(ctx, network, addr)
+	// TODO: goroutine pool
+	conn, err := net.Dial(network, addr)
 	if err != nil {
 		return nil, err
 	}

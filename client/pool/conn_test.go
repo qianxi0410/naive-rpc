@@ -62,6 +62,7 @@ func buildSimpleTCPServer(ch chan struct{}) {
 		go func() {
 			buffer := make([]byte, 256)
 			conn.Read(buffer)
+			conn.Write([]byte("hello"))
 		}()
 	}
 }
@@ -99,6 +100,15 @@ func newConnPool(maxIdle, maxActive int) *ConnPool {
 	pool.RegisterCheckFunc(time.Millisecond*50, pool.CheckAlive)
 
 	return pool
+}
+
+func TestOverlap(t *testing.T) {
+	conn, err := net.Dial("tcp", listenAddr1)
+	if err != nil {
+		log.Fatal(err)
+	}
+	conn.Write([]byte("21312"))
+	log.Println(readClosed(conn))
 }
 
 func TestConnPoolGet(t *testing.T) {
