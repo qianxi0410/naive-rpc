@@ -113,7 +113,6 @@ func (s *TcpServerTransport) serve(l net.Listener) error {
 			tcpBufferPool.Get().([]byte),
 		}
 		ep.ctx, ep.cancel = context.WithCancel(s.ctx)
-
 		go s.proc(ep.reqCh, ep.rspCh)
 
 		go ep.Read()
@@ -124,7 +123,6 @@ func (s *TcpServerTransport) serve(l net.Listener) error {
 func (s *TcpServerTransport) proc(reqCh <-chan interface{}, rspCh chan<- interface{}) {
 
 	builder := codec.GetSessionBuilder(s.reader.codec.Name())
-
 	for {
 		select {
 		case <-s.ctx.Done():
