@@ -35,9 +35,9 @@ func (r *DefaultSession) SetError(err error) {
 type DefaultSessionBuilder struct{}
 
 func (r *DefaultSessionBuilder) Build(reqHead interface{}) (codec.Session, error) {
-	req, ok := reqHead.(Request)
+	req, ok := reqHead.(*Request)
 	if !ok {
-		return nil, fmt.Errorf("req:%v not *internal.ReqHead", req)
+		return nil, fmt.Errorf("req:%v not *evangelion.Request", req)
 	}
 
 	rspHead := &Response{}
