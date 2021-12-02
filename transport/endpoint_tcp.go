@@ -31,7 +31,7 @@ func (r *TcpEndPoint) Read() {
 
 	err := r.reader.Read(r)
 	if err != nil {
-		if err != io.EOF {
+		if err == io.EOF {
 			log.Printf("peer connection Closed now, local:%s->remote:%s", r.conn.LocalAddr(), r.conn.RemoteAddr())
 			return
 		}
