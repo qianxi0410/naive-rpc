@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"sync"
+	"fmt"
 
 	"github.com/qianxi0410/naive-rpc/router"
 	"github.com/qianxi0410/naive-rpc/transport"
@@ -13,74 +13,58 @@ import (
 // plugged into multile modules, like TcpServerTransport, UdpServerTransport, Broker, etc.
 // By this way, we can implement more modules to extend server's abilities.
 type Service struct {
-	name   string
+	// service name
+	name string
+	// context
 	ctx    context.Context
 	cancel context.CancelFunc
-	opts   *options
 
-	trans      []transport.Transport
-	transMutex *sync.Mutex
+	// a service have tranport instance
+	trans transport.Transport
 
-	router    *router.Router
-	startOnce sync.Once
-	stopOnce  sync.Once
-	closed    chan (struct{})
+	// net type
+	net string
+	// codec
+	codec string
 }
 
 // create a new server with option
-func NewService(name string, opts ...Option) *Service {
+func NewService(name string, net, codec string) *Service {
 	s := &Service{
-		name:       name,
-		opts:       &options{},
-		trans:      []transport.Transport{},
-		transMutex: &sync.Mutex{},
-		router:     router.NewRouter(),
-		startOnce:  sync.Once{},
-		stopOnce:   sync.Once{},
-		closed:     make(chan struct{}, 1),
+		name:  name,
+		net:   net,
+		codec: codec,
 	}
 	s.ctx, s.cancel = context.WithCancel(context.TODO())
 
-	for _, o := range opts {
-		o(s.opts)
-	}
 	return s
 }
 
-func (s *Service) ListenAndServe(ctx context.Context, net, addr, codec string, opts ...Option) error {
-	var (
-		trans transport.Transport
-		err   error
-	)
-
-	options := options{}
-	for _, o := range opts {
-		o(&options)
-	}
+// block func
+func (r *Service) ListenAndServe(ctx context.Context, router *router.Router, addr string) error {
+	var err error
 
 	// transport options
 	toptions := []transport.Option{}
-	if options.Router != nil {
-		toptions = append(toptions, transport.WithRouter(options.Router))
+	if router == nil {
+		return fmt.Errorf("router is nil")
 	}
+	toptions = append(toptions, transport.WithRouter(router))
 
-	if net == "tcp" || net == "tcp4" || net == "tcp6" {
-		trans, err = transport.NewTcpServerTransport(ctx, net, addr, codec, toptions...)
+	if r.net == "tcp" || r.net == "tcp4" || r.net == "tcp6" {
+		r.trans, err = transport.NewTcpServerTransport(ctx, r.net, addr, r.codec, toptions...)
 		if err != nil {
 			return err
 		}
 
 	}
 
-	s.transMutex.Lock()
-	s.trans = append(s.trans, trans)
-	s.transMutex.Unlock()
-	go trans.ListenAndServe()
+	go r.trans.ListenAndServe()
 
 	select {
 	case <-ctx.Done():
 		return nil
-	case <-trans.Closed():
+	case <-r.trans.Closed():
 		return nil
 	}
 
