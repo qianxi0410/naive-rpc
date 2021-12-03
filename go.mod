@@ -4,7 +4,11 @@ go 1.17
 
 require google.golang.org/protobuf v1.27.1
 
-require gopkg.in/yaml.v2 v2.4.0 // indirect
+require (
+	github.com/coreos/etcd v2.3.8+incompatible // indirect
+	go.etcd.io/etcd v2.3.8+incompatible // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.0 // indirect
