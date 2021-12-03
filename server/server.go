@@ -19,7 +19,10 @@ type Service struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	// a service have tranport instance
+	// a service have some tranport instance
+	// may include udp tcp http
+	// but now we only have tcp
+	// []transport.Tranport
 	trans transport.Transport
 
 	// net type
