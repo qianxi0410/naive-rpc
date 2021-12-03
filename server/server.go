@@ -48,7 +48,6 @@ func NewService(name string, opts ...Option) *Service {
 }
 
 func (s *Service) ListenAndServe(ctx context.Context, net, addr, codec string, opts ...Option) error {
-
 	var (
 		trans transport.Transport
 		err   error
@@ -76,8 +75,13 @@ func (s *Service) ListenAndServe(ctx context.Context, net, addr, codec string, o
 	s.transMutex.Lock()
 	s.trans = append(s.trans, trans)
 	s.transMutex.Unlock()
-
 	go trans.ListenAndServe()
 
-	return nil
+	select {
+	case <-ctx.Done():
+		return nil
+	case <-trans.Closed():
+		return nil
+	}
+
 }
