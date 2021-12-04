@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	s := server.NewService("multi", "tcp", evangelion.NAME)
+	s := server.NewService("multi", "tcp", "localhost:9090", evangelion.NAME)
 
 	r := router.NewRouter()
 	r.Forward("/ping", func(ctx context.Context, req interface{}) (rsp interface{}, err error) {
@@ -18,7 +18,7 @@ func main() {
 		}, nil
 	})
 
-	err := s.ListenAndServe(context.TODO(), r, "localhost:9090")
+	err := s.ListenAndServe(context.TODO(), r)
 	if err != nil {
 		panic(err)
 	}

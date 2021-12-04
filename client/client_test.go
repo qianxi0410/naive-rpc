@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/qianxi0410/naive-rpc/client/selector"
+	"go.etcd.io/etcd/clientv3"
 )
 
 func newClient(name, address, codec string, selector selector.Selector) Client {
@@ -13,7 +14,7 @@ func newClient(name, address, codec string, selector selector.Selector) Client {
 		WithCodec(codec),
 		WithSelector(selector),
 	}
-	client := NewClient(name, opts...)
+	client := NewClient(name, clientv3.Config{}, opts...)
 	return client
 }
 

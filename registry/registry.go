@@ -2,8 +2,6 @@ package registry
 
 import (
 	"sync"
-
-	"github.com/qianxi0410/naive-rpc/server"
 )
 
 var (
@@ -14,14 +12,12 @@ var (
 // Registry registry interacts with the remote Nameing Service
 type Registry interface {
 	// Register, register service
-	Register(service *server.Service, opts ...Option) error
+	Register(name, net, id, addr string, opts ...Option) error
 	// UnRegister, unregister service
-	DeRegister(service *server.Service) error
+	DeRegister(name, net, id string) error
 
 	// GetService, get services by name, which may have more than one version
-	GetService(name string) ([]*server.Service, error)
-	// ListServices, list all registered services
-	ListServices() ([]*server.Service, error)
+	GetAddrs(name, proto string) ([]string, error)
 
 	// Watcher, returns a watcher, which watches events on NamingService backend
 	Watcher() (Watcher, error)

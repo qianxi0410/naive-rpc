@@ -2,10 +2,13 @@ package server
 
 import (
 	"context"
+	"crypto/md5"
 	"fmt"
 
+	"github.com/qianxi0410/naive-rpc/registry"
 	"github.com/qianxi0410/naive-rpc/router"
 	"github.com/qianxi0410/naive-rpc/transport"
+	"go.etcd.io/etcd/clientv3"
 )
 
 // Service represents a server instance (a server process),
@@ -14,7 +17,7 @@ import (
 // By this way, we can implement more modules to extend server's abilities.
 type Service struct {
 	// service name
-	name string
+	Name string
 	// context
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -26,25 +29,40 @@ type Service struct {
 	trans transport.Transport
 
 	// net type
-	net string
+	Net string
+	// addr type
+	Addr string
 	// codec
 	codec string
+	// for etcd, like an uniqie id
+	Id string
+	// etcd
+	registry registry.Registry
 }
 
 // create a new server with option
-func NewService(name string, net, codec string) *Service {
+func NewService(name string, net, addr, codec string, c clientv3.Config) *Service {
 	s := &Service{
-		name:  name,
-		net:   net,
-		codec: codec,
+		Name:     name,
+		Net:      net,
+		Addr:     addr,
+		codec:    codec,
+		Id:       string(md5.New().Sum([]byte(name + addr))),
+		registry: registry.NewEvaRegistry(c),
 	}
 	s.ctx, s.cancel = context.WithCancel(context.TODO())
-
+	err := s.registry.Register(name, net, s.Id, addr)
+	if err != nil {
+		return nil
+	}
 	return s
 }
 
 // block func
-func (r *Service) ListenAndServe(ctx context.Context, router *router.Router, addr string) error {
+func (r *Service) ListenAndServe(ctx context.Context, router *router.Router) error {
+	defer func() {
+		r.registry.DeRegister(r.Name, r.Net, r.Id)
+	}()
 	var err error
 
 	// transport options
@@ -54,8 +72,8 @@ func (r *Service) ListenAndServe(ctx context.Context, router *router.Router, add
 	}
 	toptions = append(toptions, transport.WithRouter(router))
 
-	if r.net == "tcp" || r.net == "tcp4" || r.net == "tcp6" {
-		r.trans, err = transport.NewTcpServerTransport(ctx, r.net, addr, r.codec, toptions...)
+	if r.Net == "tcp" || r.Net == "tcp4" || r.Net == "tcp6" {
+		r.trans, err = transport.NewTcpServerTransport(ctx, r.Net, r.Addr, r.codec, toptions...)
 		if err != nil {
 			return err
 		}
@@ -63,7 +81,6 @@ func (r *Service) ListenAndServe(ctx context.Context, router *router.Router, add
 	}
 
 	go r.trans.ListenAndServe()
-
 	select {
 	case <-ctx.Done():
 		return nil

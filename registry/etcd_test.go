@@ -56,7 +56,7 @@ func TestWatch(t *testing.T) {
 	})
 	assert.Nil(t, err)
 
-	wc := cli.Watch(context.TODO(), "key")
+	wc := cli.Watch(context.TODO(), "/keys", clientv3.WithPrefix())
 	for c := range wc {
 		for _, ev := range c.Events {
 			log.Printf("Type: %s Key:%s Value:%s\n", ev.Type, ev.Kv.Key, ev.Kv.Value)
