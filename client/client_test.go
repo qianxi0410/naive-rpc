@@ -14,7 +14,7 @@ func newClient(name, address, codec string, selector selector.Selector) Client {
 		WithCodec(codec),
 		WithSelector(selector),
 	}
-	client := NewClient(name, clientv3.Config{}, opts...)
+	client := NewClient(name, clientv3.Config{}, 0, opts...)
 	return client
 }
 

@@ -73,3 +73,15 @@ func TestDelete(t *testing.T) {
 
 	cli.Delete(context.TODO(), "key")
 }
+
+func TestGetNotExist(t *testing.T) {
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"127.0.0.1:3000"},
+		DialTimeout: time.Second * 5,
+	})
+	assert.Nil(t, err)
+
+	v, err := cli.Get(context.TODO(), "none")
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(v.Kvs))
+}

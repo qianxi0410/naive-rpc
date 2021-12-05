@@ -2,33 +2,29 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"github.com/qianxi0410/naive-rpc/codec/evangelion"
 	"github.com/qianxi0410/naive-rpc/router"
 	"github.com/qianxi0410/naive-rpc/server"
+	"go.etcd.io/etcd/clientv3"
 )
 
 func main() {
-	r := router.NewRouter()
-
-	r.Forward("/ping", func(ctx context.Context, req interface{}) (rsp interface{}, err error) {
-		return &evangelion.Response{
-			Body: []byte("hello world"),
-		}, nil
+	s := server.NewService("registry", "tcp", "localhost:9090", evangelion.NAME, clientv3.Config{
+		Endpoints:   []string{"127.0.0.1:3000"},
+		DialTimeout: 5 * time.Second,
 	})
 
-	// naiverpc.ListenAndServe(r, naiverpc.WithConf("../conf/service.yaml"))
-	s := server.NewService("naive", "tcp", "127.0.0.1:8888", evangelion.NAME)
+	r := router.NewRouter()
+	r.Forward("/ping", func(ctx context.Context, req interface{}) (rsp interface{}, err error) {
+		return &evangelion.Response{
+			Body: []byte("pong2"),
+		}, nil
+	})
 
 	err := s.ListenAndServe(context.TODO(), r)
 	if err != nil {
 		panic(err)
 	}
-
-	r2 := router.NewRouter()
-	r2.Forward("/ping", func(ctx context.Context, req interface{}) (rsp interface{}, err error) {
-		return &evangelion.Response{
-			Body: []byte("hello qianxi"),
-		}, nil
-	})
 }

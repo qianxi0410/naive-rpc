@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/qianxi0410/naive-rpc/client/selector"
+	"go.etcd.io/etcd/clientv3"
 )
 
 func TestIPSelector(t *testing.T) {
@@ -11,7 +12,9 @@ func TestIPSelector(t *testing.T) {
 		network = "tcp"
 		address = "127.0.0.1:8888"
 	)
-	s := selector.NewIPSelector(network, []string{address})
+	s := selector.NewIPSelector("test2", "tcp", selector.RANDOM, clientv3.Config{
+		Endpoints: []string{"127.0.0.1:3000"},
+	})
 	if s == nil {
 		t.Fatalf("ipselector create failed")
 	}
@@ -21,7 +24,7 @@ func TestIPSelector(t *testing.T) {
 		t.Fatalf("ipselector select error:%v", err)
 	}
 
-	if n.Network != "tcp" && n.Address != "127.0.0.1:8888" {
+	if n.Network != "tcp" && n.Address != "127.0.0.1:9999" {
 		t.Fatalf("ipselector select error, got %s/%s, want %s/%s", n.Address, n.Network, address, network)
 	}
 }

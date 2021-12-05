@@ -1,19 +1,50 @@
 package selector
 
-import "github.com/qianxi0410/naive-rpc/client/selector/balancer"
+import (
+	"github.com/qianxi0410/naive-rpc/client/selector/balancer"
+	"github.com/qianxi0410/naive-rpc/registry"
+	"go.etcd.io/etcd/clientv3"
+)
+
+type SelectorType int
+
+const (
+	RANDOM SelectorType = iota
+	ROUND_ROUBIN
+)
 
 type IPSelector struct {
+	name     string
 	network  string
 	addrs    []string
+	registry registry.Registry
 	balancer balancer.Balancer
 }
 
-func NewIPSelector(network string, addrs []string) *IPSelector {
-	return &IPSelector{
-		network:  network,
-		addrs:    addrs,
-		balancer: &balancer.RandomBanlancer{Addrs: addrs},
+func NewIPSelector(name, network string, typ SelectorType, conf clientv3.Config) Selector {
+	var selector IPSelector
+
+	selector.name = name
+	selector.network = network
+	selector.registry = registry.NewEvaRegistry(conf)
+
+	addrs, err := selector.registry.GetAddrs(name, network)
+	if err != nil {
+		return nil
 	}
+	selector.addrs = append(selector.addrs, addrs...)
+
+	switch typ {
+	case RANDOM:
+		selector.balancer = &balancer.RandomBanlancer{Addrs: selector.addrs}
+	case ROUND_ROUBIN:
+		cli, _ := clientv3.New(conf)
+		selector.balancer = &balancer.RoundRobinBalancer{Addrs: selector.addrs, Cli: cli}
+	default:
+		selector.balancer = &balancer.RandomBanlancer{Addrs: selector.addrs}
+	}
+
+	return &selector
 }
 
 func (r *IPSelector) Select(service string) (*Node, error) {

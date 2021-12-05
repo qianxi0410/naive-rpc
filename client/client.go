@@ -11,7 +11,6 @@ import (
 	"github.com/qianxi0410/naive-rpc/client/transport"
 	"github.com/qianxi0410/naive-rpc/codec"
 	"github.com/qianxi0410/naive-rpc/codec/evangelion"
-	"github.com/qianxi0410/naive-rpc/registry"
 	"go.etcd.io/etcd/clientv3"
 )
 
@@ -38,7 +37,6 @@ type client struct {
 	Transport     transport.Transport
 	TransportType TransportType
 	RpcType       RpcType
-	registry      registry.Registry
 }
 
 func (r *client) Invoke(ctx context.Context, reqHead interface{}, opts ...Option) (rspHead interface{}, err error) {
@@ -54,25 +52,25 @@ func (r *client) Invoke(ctx context.Context, reqHead interface{}, opts ...Option
 		address = strings.TrimPrefix(r.Addr, "ip://")
 		// FIXME:
 	} else if r.Name != "" && r.Selector != nil {
-		// node, err := r.Selector.Select(r.Name)
-		// if err != nil {
-		// 	return nil, err
-		// }
-
-		// network = node.Network
-		// address = node.Address
-		addrs, err := r.registry.GetAddrs(r.Name, r.TransportType.String())
-		if err != nil || len(addrs) == 0 {
-			return nil, err
-		}
 		node, err := r.Selector.Select(r.Name)
 		if err != nil {
 			return nil, err
 		}
-		// network = r.TransportType.String()
-		// address = addrs[0]
+
 		network = node.Network
 		address = node.Address
+		// addrs, err := r.registry.GetAddrs(r.Name, r.TransportType.String())
+		// if err != nil || len(addrs) == 0 {
+		// 	return nil, err
+		// }
+		// node, err := r.Selector.Select(r.Name)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// // network = r.TransportType.String()
+		// // address = addrs[0]
+		// network = node.Network
+		// address = node.Address
 	}
 
 	rsp, err := r.Transport.Send(ctx, network, address, reqHead)
@@ -83,21 +81,21 @@ func (r *client) Invoke(ctx context.Context, reqHead interface{}, opts ...Option
 	return rsp, nil
 }
 
-func NewClient(name string, confing clientv3.Config, opts ...Option) Client {
+func NewClient(name string, conf clientv3.Config, typ selector.SelectorType, opts ...Option) Client {
 
 	c := &client{
 		Name:          name,
 		Selector:      nil,
 		TransportType: TCP,
 		Transport:     &transport.TcpTransport{},
-		// Address:      addr,
-		Codec:    codec.ClientCodec(evangelion.NAME),
-		RpcType:  SendRecv,
-		registry: registry.NewEvaRegistry(confing),
+		Codec:         codec.ClientCodec(evangelion.NAME),
+		RpcType:       SendRecv,
 	}
 
 	for _, o := range opts {
 		o(c)
 	}
+
+	c.Selector = selector.NewIPSelector(c.Name, c.TransportType.String(), typ, conf)
 	return c
 }

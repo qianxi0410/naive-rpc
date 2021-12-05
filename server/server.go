@@ -4,6 +4,9 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/qianxi0410/naive-rpc/registry"
 	"github.com/qianxi0410/naive-rpc/router"
@@ -60,9 +63,8 @@ func NewService(name string, net, addr, codec string, c clientv3.Config) *Servic
 
 // block func
 func (r *Service) ListenAndServe(ctx context.Context, router *router.Router) error {
-	defer func() {
-		r.registry.DeRegister(r.Name, r.Net, r.Id)
-	}()
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	var err error
 
 	// transport options
@@ -81,10 +83,18 @@ func (r *Service) ListenAndServe(ctx context.Context, router *router.Router) err
 	}
 
 	go r.trans.ListenAndServe()
+
+	defer func() {
+		r.registry.DeRegister(r.Name, r.Net, r.Id)
+	}()
+
 	select {
 	case <-ctx.Done():
 		return nil
 	case <-r.trans.Closed():
+		return nil
+	case <-c:
+		fmt.Println("im done bye~")
 		return nil
 	}
 

@@ -5,9 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/qianxi0410/naive-rpc/codec/evangelion"
 	"github.com/qianxi0410/naive-rpc/registry"
-	"github.com/qianxi0410/naive-rpc/server"
 	"github.com/stretchr/testify/assert"
 	"go.etcd.io/etcd/clientv3"
 )
@@ -21,15 +19,15 @@ func init() {
 	})
 }
 
-func TestRegister(t *testing.T) {
-	s1 := server.NewService("test2", "tcp", "127.0.0.1:8888", evangelion.NAME)
-	s2 := server.NewService("test2", "tcp", "127.0.0.1:9999", evangelion.NAME)
+// func TestRegister(t *testing.T) {
+// 	s1 := server.NewService("test2", "tcp", "127.0.0.1:8888", evangelion.NAME)
+// 	s2 := server.NewService("test2", "tcp", "127.0.0.1:9999", evangelion.NAME)
 
-	err := eva.Register(s1)
-	assert.Nil(t, err)
-	err = eva.Register(s2)
-	assert.Nil(t, err)
-}
+// 	err := eva.Register(s1)
+// 	assert.Nil(t, err)
+// 	err = eva.Register(s2)
+// 	assert.Nil(t, err)
+// }
 
 func TestGetAddrs(t *testing.T) {
 	s, err := eva.GetAddrs("test2", "tcp")
@@ -38,7 +36,7 @@ func TestGetAddrs(t *testing.T) {
 	log.Println(s)
 }
 
-func TestDeRegistry(t *testing.T) {
-	s1 := server.NewService("test2", "tcp", "127.0.0.1:8888", evangelion.NAME)
-	eva.DeRegister(s1)
-}
+// func TestDeRegistry(t *testing.T) {
+// 	s1 := server.NewService("test2", "tcp", "127.0.0.1:8888", evangelion.NAME)
+// 	eva.DeRegister(s1)
+// }
