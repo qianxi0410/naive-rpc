@@ -7,6 +7,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/kpango/glg"
 	"github.com/qianxi0410/naive-rpc/client/pool"
 	"github.com/qianxi0410/naive-rpc/codec"
 	"github.com/qianxi0410/naive-rpc/errors"
@@ -28,6 +29,7 @@ func (r *TcpTransport) Send(ctx context.Context, network, addr string, reqHead i
 	// conn, err := r.Pool.Get(ctx, network, addr)
 	// TODO: goroutine pool
 	conn, err := net.Dial(network, addr)
+	glg.Infof("client is request %s, please wait", addr)
 	if err != nil {
 		return nil, err
 	}

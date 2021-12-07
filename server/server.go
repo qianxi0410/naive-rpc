@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/kpango/glg"
 	"github.com/qianxi0410/naive-rpc/registry"
 	"github.com/qianxi0410/naive-rpc/router"
 	"github.com/qianxi0410/naive-rpc/transport"
@@ -58,6 +59,7 @@ func NewService(name string, net, addr, codec string, c clientv3.Config) *Servic
 	if err != nil {
 		return nil
 	}
+	glg.Successf("%s service is init", name)
 	return s
 }
 
@@ -94,7 +96,7 @@ func (r *Service) ListenAndServe(ctx context.Context, router *router.Router) err
 	case <-r.trans.Closed():
 		return nil
 	case <-c:
-		fmt.Println("im done bye~")
+		glg.Info("im done, bye bye ~")
 		return nil
 	}
 

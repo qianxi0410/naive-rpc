@@ -2,10 +2,10 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
+	"github.com/kpango/glg"
 	"github.com/qianxi0410/naive-rpc/client/pool"
 	"github.com/qianxi0410/naive-rpc/client/selector"
 	"github.com/qianxi0410/naive-rpc/client/transport"
@@ -48,7 +48,6 @@ func (r *client) Invoke(ctx context.Context, reqHead interface{}, opts ...Option
 
 	if r.Addr != "" && r.TransportType.Valid() {
 		network = r.TransportType.String()
-		fmt.Println(network)
 		address = strings.TrimPrefix(r.Addr, "ip://")
 		// FIXME:
 	} else if r.Name != "" && r.Selector != nil {
@@ -77,7 +76,7 @@ func (r *client) Invoke(ctx context.Context, reqHead interface{}, opts ...Option
 	if err != nil {
 		return nil, err
 	}
-
+	glg.Successf("client invoke remote method success")
 	return rsp, nil
 }
 
@@ -97,5 +96,6 @@ func NewClient(name string, conf clientv3.Config, typ selector.SelectorType, opt
 	}
 
 	c.Selector = selector.NewIPSelector(c.Name, c.TransportType.String(), typ, conf)
+	glg.Successf("%s clinet is init", name)
 	return c
 }

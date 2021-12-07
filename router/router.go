@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/kpango/glg"
 	"github.com/qianxi0410/naive-rpc/errors"
 )
 
@@ -49,6 +50,7 @@ func (r *Router) RegisterService(srvDesc *ServiceDesc, srvImpl interface{}) erro
 }
 
 func (r *Router) Forward(rpcName string, handleFunc HandleWrapper) {
+	glg.Successf("%s router is registed", rpcName)
 	r.mapping[rpcName] = handleFunc
 }
 

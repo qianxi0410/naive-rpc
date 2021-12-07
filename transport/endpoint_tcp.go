@@ -3,10 +3,10 @@ package transport
 import (
 	"context"
 	"io"
-	"log"
 	"net"
 	"time"
 
+	"github.com/kpango/glg"
 	"github.com/qianxi0410/naive-rpc/codec"
 )
 
@@ -32,10 +32,10 @@ func (r *TcpEndPoint) Read() {
 	err := r.reader.Read(r)
 	if err != nil {
 		if err == io.EOF {
-			log.Printf("peer connection Closed now, local:%s->remote:%s", r.conn.LocalAddr(), r.conn.RemoteAddr())
+			glg.Infof("peer connection Closed now, local:%s->remote:%s", r.conn.LocalAddr(), r.conn.RemoteAddr())
 			return
 		}
-		log.Fatalf("tcp read request error:%v", err)
+		glg.Errorf("tcp read request error:%v", err)
 	}
 }
 
@@ -53,7 +53,7 @@ func (r *TcpEndPoint) Write() {
 			rsp := session.Response()
 			data, err := r.reader.codec.Encode(rsp)
 			if err != nil {
-				log.Fatalf("tcp encode respone error:%v", err)
+				glg.Fatalf("tcp encode respone error:%v", err)
 				continue
 			}
 
@@ -61,7 +61,7 @@ func (r *TcpEndPoint) Write() {
 			n, err := r.conn.Write(data)
 			if err != nil || len(data) != n {
 				// fixme handle error
-				log.Fatalf("tcp send response error:%v, bytes written got:%d, want:%d", err, n, len(data))
+				glg.Fatalf("tcp send response error:%v, bytes written got:%d, want:%d", err, n, len(data))
 				continue
 			}
 		}

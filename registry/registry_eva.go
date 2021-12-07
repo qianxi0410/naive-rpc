@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/coreos/etcd/Godeps/_workspace/src/golang.org/x/net/context"
+	"github.com/kpango/glg"
 	"go.etcd.io/etcd/clientv3"
 )
 
@@ -29,12 +30,14 @@ func NewEvaRegistry(c clientv3.Config) *EvaRegistry {
 func (r *EvaRegistry) Register(name, net, id, addr string, opts ...Option) error {
 	key := fmt.Sprintf("%s/%s/%s", name, net, id)
 	_, err := r.cli.Put(context.TODO(), key, addr)
+	glg.Successf("%s service [%s] is registered to etcd", name, addr)
 	return err
 }
 
 func (r *EvaRegistry) DeRegister(name, net, id string) error {
 	key := fmt.Sprintf("%s/%s/%s", name, net, id)
 	_, err := r.cli.Delete(context.TODO(), key)
+	glg.Successf("%s service is de-registered from etcd", name)
 	return err
 }
 

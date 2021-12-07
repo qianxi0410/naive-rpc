@@ -2,11 +2,11 @@ package transport
 
 import (
 	"context"
-	"log"
 	"net"
 	"sync"
 	"time"
 
+	"github.com/kpango/glg"
 	"github.com/qianxi0410/naive-rpc/codec"
 	"github.com/qianxi0410/naive-rpc/errors"
 	"github.com/qianxi0410/naive-rpc/router"
@@ -61,6 +61,7 @@ func NewTcpServerTransport(ctx context.Context, net, addr, codecName string, opt
 	for _, o := range opts {
 		o(s.opts)
 	}
+	glg.Success("tcp transport is init")
 	return s, nil
 }
 
@@ -130,19 +131,19 @@ func (s *TcpServerTransport) proc(reqCh <-chan interface{}, rspCh chan<- interfa
 			return
 		case req, ok := <-reqCh:
 			if !ok {
-				log.Printf("one endpoint.reqCh is Closed")
+				glg.Infof("one endpoint.reqCh is Closed")
 				return
 			}
 			// build session
 			session, err := builder.Build(req)
 			if err != nil {
-				log.Fatalf("tcp build session error:%v", err)
+				glg.Fatalf("tcp build session error:%v", err)
 				continue
 			}
 			// fixme using workerpool instead of goroutine
 			r := s.opts.Router
 			if r == nil {
-				log.Fatalf("tcp router not initialized")
+				glg.Fatalf("tcp router not initialized")
 			}
 
 			go func() {
@@ -150,7 +151,7 @@ func (s *TcpServerTransport) proc(reqCh <-chan interface{}, rspCh chan<- interfa
 				handle, err := r.Route(session.RPCName())
 				if err != nil {
 					session.SetError(err)
-					log.Fatalf("tcp router route error:%v", err)
+					glg.Fatalf("tcp router route error:%v", err)
 					return
 				}
 				// pass session+req to handlefunc
@@ -158,7 +159,7 @@ func (s *TcpServerTransport) proc(reqCh <-chan interface{}, rspCh chan<- interfa
 				rsp, err := handle(ctx, req)
 				if err != nil {
 					session.SetError(err)
-					log.Fatalf("tcp handle func error:%v, rsp:%v", err, rsp)
+					glg.Fatalf("tcp handle func error:%v, rsp:%v", err, rsp)
 				} else {
 					session.SetResponse(rsp)
 				}
