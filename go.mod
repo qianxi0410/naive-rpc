@@ -6,6 +6,9 @@ require google.golang.org/protobuf v1.27.1
 
 require (
 	github.com/coreos/etcd v2.3.8+incompatible // indirect
+	github.com/goccy/go-json v0.7.4 // indirect
+	github.com/kpango/fastime v1.0.17 // indirect
+	github.com/kpango/glg v1.6.4 // indirect
 	go.etcd.io/etcd v2.3.8+incompatible // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
