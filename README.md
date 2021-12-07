@@ -12,3 +12,4 @@
  - loadbalance
  - goroutine pool
  - over tcp transport (less info)
+ - log info support
