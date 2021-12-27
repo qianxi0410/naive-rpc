@@ -109,7 +109,7 @@ func (c *ClientCodec) Encode(pkg interface{}) ([]byte, error) {
 
 	pb, ok := pkg.(*Request)
 	if !ok {
-		return nil, ers.New("pkg not valid *whisper.RspHead")
+		return nil, ers.New("pkg not valid *evangelion.ReqHead")
 	}
 
 	data, err := proto.Marshal(pb)
