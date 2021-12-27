@@ -4,6 +4,7 @@ package evangelion;
 
 option go_package = "../evangelion";
 
+
 // Request definition
 //
 // In Request, tracing `traceContext` is stored in map `meta`.
