@@ -51,16 +51,11 @@ func (r *Router) RegisterService(srvDesc *ServiceDesc, srvImpl interface{}) erro
 
 func (r *Router) Forward(rpcName string, handleFunc HandleWrapper) {
 
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
 	r.mapping[rpcName] = handleFunc
 	glg.Successf("%s router is registed", rpcName)
 }
 
 func (r *Router) Route(rpcName string) (HandleWrapper, error) {
-	r.mutex.RLock()
-	defer r.mutex.Unlock()
 
 	f, ok := r.mapping[rpcName]
 	if !ok {
