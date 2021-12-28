@@ -43,7 +43,8 @@ func (r *Router) RegisterService(srvDesc *ServiceDesc, srvImpl interface{}) erro
 			// handle func
 			return m.Method(srvImpl, ctx, req)
 		}
-		r.mapping[rpc] = f
+		// r.mapping[rpc] = f
+		r.Forward(rpc, f)
 	}
 
 	return nil
@@ -55,6 +56,9 @@ func (r *Router) Forward(rpcName string, handleFunc HandleWrapper) {
 }
 
 func (r *Router) Route(rpcName string) (HandleWrapper, error) {
+	r.mutex.RLock()
+	defer r.mutex.Unlock()
+
 	f, ok := r.mapping[rpcName]
 	if !ok {
 		return nil, errors.RouteNotFoundErr
